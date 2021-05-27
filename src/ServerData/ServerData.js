@@ -16,7 +16,7 @@ const ServerData = ({ sData, setSData, renderTableData }) => {
     getServerData();
   }, [setSData]);
 
-  return renderTableData(sData, "add server data", true);
+  return renderTableData(sData);
 };
 
 export default ServerData;

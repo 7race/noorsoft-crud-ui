@@ -34,9 +34,9 @@ const Input = styled.input`
 const Modal = ({
   active,
   setModalActive,
-  lData,
-  setLData,
-  isServerButton,
+  // lData,
+  // setLData,
+  // isServerButton,
   sData,
   setSData,
 }) => {
@@ -47,7 +47,7 @@ const Modal = ({
 
   const addTableEntry = (e) => {
     if (valueName && valueAge) {
-      if (isServerButton) {
+      // if (isServerButton) {
         async function addServerData() {
           try {
             const addItem = await axios({
@@ -66,16 +66,16 @@ const Modal = ({
         }
 
         addServerData();
-      } else {
-        setLData(() => {
-          return {
-            users: [
-              ...lData.users,
-              { _id: uniqid(), data: { name: valueName, age: valueAge } },
-            ],
-          };
-        });
-      }
+      // } else {
+      //   setLData(() => {
+      //     return {
+      //       users: [
+      //         ...lData.users,
+      //         { _id: uniqid(), data: { name: valueName, age: valueAge } },
+      //       ],
+      //     };
+      //   });
+      // }
       setValueName(() => "");
       setValueAge(() => "");
     } else {

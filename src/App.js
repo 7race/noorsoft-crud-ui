@@ -1,8 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import localData from "./data.json";
 import Modal from "./Modal/Modal";
-import LocalData from "./LocalData/LocalData";
 import ServerData from "./ServerData/ServerData";
 import axios from "axios";
 
@@ -36,10 +34,8 @@ const Td = styled.td`
 `;
 
 function App() {
-  const [lData, setLData] = React.useState(localData);
   const [sData, setSData] = React.useState([]);
   const [modalActive, setModalActive] = React.useState(false);
-  const [isServerButton, setIsServerButton] = React.useState(null);
   const [isEdit, setIsEdit] = React.useState(false);
   const nameInputRef = React.useRef(null);
   const ageInputRef = React.useRef(null);
@@ -53,15 +49,14 @@ function App() {
     );
   };
 
-  const renderTableData = (typeData, textButton, isServer) => {
+  const renderTableData = (typeData) => {
     const addButton = (
       <button
         onClick={() => {
           setModalActive(true);
-          setIsServerButton(isServer);
         }}
       >
-        {textButton}
+        add data
       </button>
     );
     if (typeData.length === 0) {
@@ -81,7 +76,6 @@ function App() {
             <Td
               onClick={deleteItem}
               id={user._id}
-              data-isserver={isServer}
               isEdit={isEdit}
             >
               ❌
@@ -89,7 +83,6 @@ function App() {
             <Td
               onClick={editItem}
               id={user._id}
-              data-isserver={isServer}
               isEdit={isEdit}
             >
               ✏️
@@ -139,26 +132,20 @@ function App() {
     if (isEdit) {
       return;
     }
-    if (e.target.dataset.isserver === "true") {
-      async function deleteData() {
-        try {
-          const deleteData = await axios({
-            method: "DELETE",
-            url: `http://178.128.196.163:3000/api/records/${e.target.id}`,
-          });
+    async function deleteData() {
+      try {
+        const deleteData = await axios({
+          method: "DELETE",
+          url: `http://178.128.196.163:3000/api/records/${e.target.id}`,
+        });
 
-          renderNewServer(deleteData.status, e, "delete");
-        } catch (error) {
-          console.log(error);
-        }
+        renderNewServer(deleteData.status, e, "delete");
+      } catch (error) {
+        console.log(error);
       }
-
-      deleteData();
-    } else {
-      const newData = lData.users.filter((v) => v._id !== e.target.id);
-      const renderData = { users: newData };
-      setLData(() => renderData);
     }
+
+    deleteData();
   };
 
   const styleEditSettings = (e) => {
@@ -169,9 +156,9 @@ function App() {
     e.target.onmouseleave = function () {
       e.target.style.background = styleDefaultEl;
     };
-    e.target.onmousedown = function(){
+    e.target.onmousedown = function () {
       e.target.style.background = styleActiveEl;
-    }
+    };
     e.target.addEventListener("click", () => {
       e.target.onmouseover = null;
       e.target.onmouseleave = null;
@@ -180,93 +167,51 @@ function App() {
   };
 
   const editItem = (e) => {
-    if (e.target.dataset.isserver === "true") {
-      if (isEdit) {
-        if (e.target.innerHTML !== "📁") {
-          return;
-        }
-        if (nameInputRef.current && ageInputRef.current) {
-          async function updateData() {
-            try {
-              const updateData = await axios({
-                method: "POST",
-                url: `http://178.128.196.163:3000/api/records/${e.target.id}`,
+    if (isEdit) {
+      if (e.target.innerHTML !== "📁") {
+        return;
+      }
+      if (nameInputRef.current && ageInputRef.current) {
+        async function updateData() {
+          try {
+            const updateData = await axios({
+              method: "POST",
+              url: `http://178.128.196.163:3000/api/records/${e.target.id}`,
+              data: {
                 data: {
-                  data: {
-                    name: nameInputRef.current.value,
-                    age: ageInputRef.current.value,
-                  },
+                  name: nameInputRef.current.value,
+                  age: ageInputRef.current.value,
                 },
-              });
+              },
+            });
 
-              e.target.innerHTML = "✏️";
-              e.target.style.removeProperty("background");
-              setIsEdit(false);
-              renderNewServer(updateData.status, e, "update");
-            } catch (error) {
-              console.log(error);
-            }
-          }
-          updateData();
-        }
-      } else {
-        const widthInput = { width: "auto" };
-        const newData = [...sData];
-        for (const user of newData) {
-          if (user._id === e.target.id) {
-            user.data.name = (
-              <input ref={nameInputRef} style={widthInput} type="text" />
-            );
-            user.data.age = (
-              <input ref={ageInputRef} style={widthInput} type="text" />
-            );
-            e.target.innerHTML = "📁";
-            styleEditSettings(e);
+            e.target.innerHTML = "✏️";
+            e.target.style.removeProperty("background");
+            setIsEdit(false);
+            renderNewServer(updateData.status, e, "update");
+          } catch (error) {
+            console.log(error);
           }
         }
-        setIsEdit(true);
-        setSData(newData);
+        updateData();
       }
     } else {
-      if (isEdit) {
-        if (e.target.innerHTML !== "📁") {
-          return;
+      const widthInput = { width: "auto" };
+      const newData = [...sData];
+      for (const user of newData) {
+        if (user._id === e.target.id) {
+          user.data.name = (
+            <input ref={nameInputRef} style={widthInput} type="text" />
+          );
+          user.data.age = (
+            <input ref={ageInputRef} style={widthInput} type="text" />
+          );
+          e.target.innerHTML = "📁";
+          styleEditSettings(e);
         }
-        if (nameInputRef.current && ageInputRef.current) {
-          const newData = Object.assign({}, lData);
-
-          for (const user of newData.users) {
-            if (user._id === e.target.id) {
-              user.data.name = nameInputRef.current.value;
-              user.data.age = ageInputRef.current.value;
-              e.target.innerHTML = "✏️";
-            }
-          }
-
-          setLData(newData);
-          e.target.style.removeProperty("background");
-          setIsEdit(false);
-        }
-      } else {
-        const widthInput = { width: "auto" };
-        const newData = Object.assign({}, lData);
-
-        for (const user of newData.users) {
-          if (user._id === e.target.id) {
-            user.data.name = (
-              <input ref={nameInputRef} style={widthInput} type="text" />
-            );
-            user.data.age = (
-              <input ref={ageInputRef} style={widthInput} type="text" />
-            );
-            e.target.innerHTML = "📁";
-            styleEditSettings(e);
-          }
-        }
-
-        setIsEdit(true);
-        setLData(newData);
       }
+      setIsEdit(true);
+      setSData(newData);
     }
   };
 
@@ -276,17 +221,10 @@ function App() {
         <tbody>
           {tableHead()}
 
-          <LocalData
-            lData={lData}
-            setModalActive={setModalActive}
-            setIsServerButton={setIsServerButton}
-            renderTableData={renderTableData}
-          />
           <ServerData
             sData={sData}
             setSData={setSData}
             setModalActive={setModalActive}
-            setIsServerButton={setIsServerButton}
             renderTableData={renderTableData}
           />
         </tbody>
@@ -294,11 +232,8 @@ function App() {
       <Modal
         active={modalActive}
         setModalActive={setModalActive}
-        lData={lData}
-        setLData={setLData}
         sData={sData}
         setSData={setSData}
-        isServerButton={isServerButton}
       />
     </div>
   );

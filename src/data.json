@@ -1,6 +1,0 @@
-{
-  "users": [
-    { "_id": "id1", "data": { "name": "Jonh", "age": "30" } },
-    { "_id": "id2", "data": { "name": "ZZZ", "age": "33" } }
-  ]
-}
